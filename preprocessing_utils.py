@@ -203,18 +203,18 @@ class ZeroShotClassifier:
             return {}
 
     def text_labels(self, text, category_dict, cutoff=None):
-    """
-    Classifies text into predefined categories and formats the results. 
-    Optionally applies a score cutoff to filter results.
+        """
+        Classifies text into predefined categories and formats the results. 
+        Optionally applies a score cutoff to filter results.
 
-    Args:
-        text (str): The text to classify.
-        category_dict (dict): A dictionary mapping categories to labels.
-        cutoff (float, optional): A score threshold for filtering results.
+        Args:
+            text (str): The text to classify.
+            category_dict (dict): A dictionary mapping categories to labels.
+            cutoff (float, optional): A score threshold for filtering results.
 
-    Returns:
-        DataFrame: A pandas DataFrame with classification results.
-    """
+        Returns:
+            DataFrame: A pandas DataFrame with classification results.
+        """
     categories = list(category_dict.keys())
     result = self.classify_text(text, categories, multi_label=True)
 
