@@ -1,8 +1,7 @@
 import pandas as pd
 import re
 import string
-import nltk
-nltk.download('punkt')
+from nltk.tokenize import TreebankWordTokenizer
 from transformers import pipeline
 from tika import parser
 
@@ -120,8 +119,9 @@ class ParsePDF:
         Returns:
             list: A list of tokenized sentences.
         """
+        tokenizer = TreebankWordTokenizer()
         sentences = []
-        for sentence in nltk.sent_tokenize(text):
+        for sentence in tokenizer.tokenize(text):
             cleaned_sentence = self.clean_sentence(sentence)
             if "table of contents" not in cleaned_sentence and len(cleaned_sentence) > 5:
                 sentences.append(cleaned_sentence)
