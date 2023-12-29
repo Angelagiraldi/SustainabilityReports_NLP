@@ -215,20 +215,20 @@ class ZeroShotClassifier:
         Returns:
             DataFrame: A pandas DataFrame with classification results.
         """
-    categories = list(category_dict.keys())
-    result = self.classify_text(text, categories, multi_label=True)
+        categories = list(category_dict.keys())
+        result = self.classify_text(text, categories, multi_label=True)
 
-    if not result:
-        return pd.DataFrame()  # Return an empty DataFrame in case of an error
+        if not result:
+            return pd.DataFrame()  # Return an empty DataFrame in case of an error
 
-    # Process each label and score, applying the cutoff if provided
-    processed_results = []
-    for label, score in zip(result["labels"], result["scores"]):
-        if cutoff is None or score > cutoff:
-            processed_results.append({
-                "label": label,
-                "score": score,
-                "ESG": category_dict.get(label, "Unknown")
-            })
+        # Process each label and score, applying the cutoff if provided
+        processed_results = []
+        for label, score in zip(result["labels"], result["scores"]):
+            if cutoff is None or score > cutoff:
+                processed_results.append({
+                    "label": label,
+                    "score": score,
+                    "ESG": category_dict.get(label, "Unknown")
+                })
 
-    return pd.DataFrame(processed_results)
+        return pd.DataFrame(processed_results)
