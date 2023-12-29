@@ -16,3 +16,6 @@ sentences = pdf_parser.clean_text(content)
 
 
 print(f"The McDonalds CSR report has {len(sentences):,d} sentences")
+print(sentences[2])
+print(sentences[1134])
+print(sentences[12456])
