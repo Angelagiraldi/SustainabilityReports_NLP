@@ -2,6 +2,7 @@ import pandas as pd
 import re
 import string
 import nltk
+nltk.download('punkt')
 from transformers import pipeline
 from tika import parser
 
