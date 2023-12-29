@@ -1,6 +1,8 @@
+import pandas as pd
 import re
 import string
 import nltk
+from transformers import pipeline
 from tika import parser
 
 class ParsePDF:
@@ -138,3 +140,95 @@ class ParsePDF:
         # Add more cleaning steps as needed
         return sentence
 
+
+
+from transformers import pipeline
+import pandas as pd
+
+class ZeroShotClassifier:
+    """
+    A class for performing zero-shot classification using Hugging Face's transformers.
+
+    Methods:
+        create_zsl_model(model_name): Initializes the zero-shot learning model.
+        classify_text(text, categories, multi_label): Classifies text into predefined categories.
+        text_labels(text, category_dict, cutoff): Classifies text and formats the results, applying an optional cutoff.
+    """
+
+    def __init__(self):
+        """
+        Initializes the ZeroShotClassifier without a model.
+        The model needs to be created using create_zsl_model method.
+        """
+        self.model = None
+
+    def create_zsl_model(self, model_name):
+        """
+        Initializes the zero-shot learning model with the specified model.
+
+        Args:
+            model_name (str): The name of the model to be used for classification.
+
+        Returns:
+            bool: True if the model is successfully created, False otherwise.
+        """
+        try:
+            self.model = pipeline("zero-shot-classification", model=model_name)
+            return True
+        except PipelineException as e:
+            print(f"Error initializing the model: {e}")
+            return False
+    
+    def classify_text(self, text, categories, multi_label=True):
+        """
+        Classifies text(s) into predefined categories using the zero-shot classification model.
+
+        Args:
+            text (str or list): The text or list of texts to classify.
+            categories (list): A list of categories for classification.
+            multi_label (bool): Whether multiple labels can be assigned to each text.
+
+        Returns:
+            dict: The classification results containing labels and scores.
+        """
+        if not self.model:
+            raise ValueError("Model not initialized. Call create_zsl_model first.")
+
+        hypothesis_template = "This text is about {}."
+        try:
+            result = self.model(text, categories, multi_label=multi_label, hypothesis_template=hypothesis_template)
+            return result
+        except Exception as e:
+            print(f"Error during classification: {e}")
+            return {}
+
+    def text_labels(self, text, category_dict, cutoff=None):
+    """
+    Classifies text into predefined categories and formats the results. 
+    Optionally applies a score cutoff to filter results.
+
+    Args:
+        text (str): The text to classify.
+        category_dict (dict): A dictionary mapping categories to labels.
+        cutoff (float, optional): A score threshold for filtering results.
+
+    Returns:
+        DataFrame: A pandas DataFrame with classification results.
+    """
+    categories = list(category_dict.keys())
+    result = self.classify_text(text, categories, multi_label=True)
+
+    if not result:
+        return pd.DataFrame()  # Return an empty DataFrame in case of an error
+
+    # Process each label and score, applying the cutoff if provided
+    processed_results = []
+    for label, score in zip(result["labels"], result["scores"]):
+        if cutoff is None or score > cutoff:
+            processed_results.append({
+                "label": label,
+                "score": score,
+                "ESG": category_dict.get(label, "Unknown")
+            })
+
+    return pd.DataFrame(processed_results)
