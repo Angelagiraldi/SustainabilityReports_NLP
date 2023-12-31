@@ -1,7 +1,10 @@
 import pandas as pd
 import re
 import string
-from nltk.tokenize import TreebankWordTokenizer
+import nltk
+import ssl
+
+
 from transformers import pipeline
 from tika import parser
 
@@ -119,9 +122,8 @@ class ParsePDF:
         Returns:
             list: A list of tokenized sentences.
         """
-        tokenizer = TreebankWordTokenizer()
         sentences = []
-        for sentence in tokenizer.tokenize(text):
+        for sentence in nltk.sent_tokenize(text):
             cleaned_sentence = self.clean_sentence(sentence)
             if "table of contents" not in cleaned_sentence and len(cleaned_sentence) > 5:
                 sentences.append(cleaned_sentence)
@@ -173,12 +175,10 @@ class ZeroShotClassifier:
         Returns:
             bool: True if the model is successfully created, False otherwise.
         """
-        try:
-            self.model = pipeline("zero-shot-classification", model=model_name)
-            return True
-        except PipelineException as e:
-            print(f"Error initializing the model: {e}")
-            return False
+
+        self.model = pipeline("zero-shot-classification", model=model_name)
+        return True
+
     
     def classify_text(self, text, categories, multi_label=True):
         """
