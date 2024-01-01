@@ -219,6 +219,8 @@ class ZeroShotClassifier:
         categories = list(category_dict.keys())
         result = self.classify_text(text, categories, multi_label=True)
 
+        print("results")
+
         if not result:
             return pd.DataFrame()  # Return an empty DataFrame in case of an error
 

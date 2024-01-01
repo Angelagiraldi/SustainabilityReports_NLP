@@ -9,7 +9,7 @@ from preprocessing_utils import *
 pd.set_option("display.max_colwidth", None)
 
 
-nestle_url = "https://www.responsibilityreports.com/HostedData/ResponsibilityReports/PDF/OTC_NSRGY_2022.pdf"
+nestle_url = "https://www.responsibilityreports.com/HostedData/ResponsibilityReports/PDF/NASDAQ_ABNB_2022.pdf"
 pdf_parser = ParsePDF(nestle_url)
 content = pdf_parser.extract_contents()
 sentences = pdf_parser.clean_text(content)
