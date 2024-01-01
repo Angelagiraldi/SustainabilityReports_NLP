@@ -13,6 +13,7 @@ nestle_url = "https://www.responsibilityreports.com/HostedData/ResponsibilityRep
 pdf_parser = ParsePDF(nestle_url)
 content = pdf_parser.extract_contents()
 sentences = pdf_parser.clean_text(content)
+print(sentences)
 
 
 print(f"The Nestlè CSR report has {len(sentences):,d} sentences")
@@ -54,6 +55,6 @@ print("Display E sentences:")
 # Ensure 'score' and 'ESG' columns exist before attempting to filter
 if 'score' in classified.columns and 'ESG' in classified.columns:
     E_sentences = classified[classified.score.gt(0.8) & classified.ESG.eq("E")].copy()
-    E_sentences.head(10)
+    print(E_sentences.head(10))
 else:
     print("Error: 'score' and/or 'ESG' columns not found in the DataFrame.")
