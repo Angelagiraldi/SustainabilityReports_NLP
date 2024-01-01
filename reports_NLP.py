@@ -48,12 +48,12 @@ classified = ZSC.text_labels(sentences, esg_categories)
 
 print("Available columns in classified DataFrame:", classified.columns)
 print("Display 20 random sentences")
-classified.sample(n=20)  # display 20 random records
+print(classified.sample(n=20))  # display 20 random records
 
 print("Display E sentences:")
-# Ensure 'scores' and 'ESG' columns exist before attempting to filter
-if 'scores' in classified.columns and 'ESG' in classified.columns:
-    E_sentences = classified[classified.scores.gt(0.8) & classified.ESG.eq("E")].copy()
+# Ensure 'score' and 'ESG' columns exist before attempting to filter
+if 'score' in classified.columns and 'ESG' in classified.columns:
+    E_sentences = classified[classified.score.gt(0.8) & classified.ESG.eq("E")].copy()
     E_sentences.head(10)
 else:
-    print("Error: 'scores' and/or 'ESG' columns not found in the DataFrame.")
+    print("Error: 'score' and/or 'ESG' columns not found in the DataFrame.")
