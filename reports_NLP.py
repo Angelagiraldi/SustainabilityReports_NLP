@@ -41,15 +41,19 @@ print("Define zero shot model")
 ZSC.create_zsl_model(model_name)
     # Note: the warning is expected, so ignore it
 
-
 # Classify all the sentences in the report
     # Note: this takes a while
 print("Classify")
 classified = ZSC.text_labels(sentences, esg_categories)
+
+print("Available columns in classified DataFrame:", classified.columns)
 print("Display 20 random sentences")
 classified.sample(n=20)  # display 20 random records
 
 print("Display E sentences:")
-# Look at an example of "E" classified sentences:
-E_sentences = classified[classified.scores.gt(0.8) & classified.ESG.eq("E")].copy()
-E_sentences.head(10)
+# Ensure 'scores' and 'ESG' columns exist before attempting to filter
+if 'scores' in classified.columns and 'ESG' in classified.columns:
+    E_sentences = classified[classified.scores.gt(0.8) & classified.ESG.eq("E")].copy()
+    E_sentences.head(10)
+else:
+    print("Error: 'scores' and/or 'ESG' columns not found in the DataFrame.")
