@@ -226,12 +226,13 @@ class ZeroShotClassifier:
 
         # Process each label and score, applying the cutoff if provided
         processed_results = []
-        for label, score in zip(result["labels"], result["scores"]):
-            if cutoff is None or score > cutoff:
-                processed_results.append({
-                    "label": label,
-                    "score": score,
-                    "ESG": category_dict.get(label, "Unknown")
-                })
+        for res in result:
+            for label, score in zip(res["labels"], res["scores"]):
+                if cutoff is None or score > cutoff:
+                    processed_results.append({
+                        "label": label,
+                        "score": score,
+                        "ESG": category_dict.get(label, "Unknown")
+                    })
 
         return pd.DataFrame(processed_results)
