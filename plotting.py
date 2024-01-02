@@ -55,9 +55,9 @@ def create_distribution_plots(data, title_prefix, filename_prefix):
     plt.title(f"{title_prefix} Violin Plot of Score Distributions")
     save_plot_as_pdf(plt, f"{filename_prefix}_violin_plot_score_distributions")
 
-# Generating heatmap of label scores for 20 random sentences
+# Generating heatmap of label scores for 10 random sentences
 print("Generating heatmap of label scores for 20 random sentences...")
-sampled_df = aggregated_df.sample(n=20)
+sampled_df = aggregated_df.sample(n=10)
 
 # Create a list of dictionaries, each containing label-score pairs for a sentence
 heatmap_data_list = []
@@ -120,26 +120,24 @@ create_distribution_plots(dominant_label_score_data, "Dominant Label", "dominant
 
 
 # Initialize a dictionary to store the frequencies
-esg_category_freq = defaultdict(lambda: defaultdict(int))
+esg_label_freq = defaultdict(lambda: defaultdict(int))
 
 # Iterate over the DataFrame to populate the dictionary
 for _, row in aggregated_df.iterrows():
-    esg_category = row['dominant_esg']
-    for label in row['labels']:
-        if esg_categories[label] == esg_category:
-            esg_category_freq[esg_category][label] += 1
+    esg_category = esg_categories.get(row['dominant_label'], 'Unknown')
+    esg_label_freq[esg_category][row['dominant_label']] += 1
 
 # Convert the dictionary to a DataFrame
-esg_category_freq_df = pd.DataFrame(esg_category_freq).fillna(0)
-
+esg_label_freq_df = pd.DataFrame(esg_label_freq).fillna(0)
+print(esg_label_freq_df.head(10))
 # Plot stacked bar chart
 plt.figure(figsize=(12, 8))
-esg_category_freq_df.plot(kind='bar', stacked=True, ax=plt.gca())
-plt.title("Frequency of Labels within ESG Categories")
+esg_label_freq_df.plot(kind='bar', stacked=True, ax=plt.gca())
+plt.title("Frequency of Dominant Labels within ESG Categories")
 plt.xlabel("ESG Categories")
-plt.ylabel("Frequency of Labels")
+plt.ylabel("Frequency of Dominant Labels")
 plt.xticks(rotation=45)
-save_plot_as_pdf(plt, "stacked_bar_esg_labels")
+save_plot_as_pdf(plt, "stacked_bar_dominant_label_esg")
 
 plt.close('all')
 print("All plots generated and saved.")
