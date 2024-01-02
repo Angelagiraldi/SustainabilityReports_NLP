@@ -74,14 +74,21 @@ E_sentences = aggregated_df[aggregated_df['ESG'].apply(lambda esg_list: 'E' in e
                             aggregated_df['scores'].apply(lambda scores: any(score > 0.8 for score in scores))]
 print(E_sentences.head(10))
 
+# Invert the esg_categories mapping
+category_to_labels = {}
+for label, category in esg_categories.items():
+    if category not in category_to_labels:
+        category_to_labels[category] = []
+    category_to_labels[category].append(label)
 
 # Number of random samples per category
 num_samples = 3
-# Iterate over each category and sample sentences
-for category in esg_categories.values():
+# Iterate over each category name
+for category, labels in category_to_labels.items():
     print(f"\nCategory: {category}")
+    
     # Filter sentences belonging to the current category
-    category_sentences = aggregated_df[aggregated_df['ESG'].apply(lambda esg_list: category in esg_list)]
+    category_sentences = aggregated_df[aggregated_df['labels'].apply(lambda x: any(label in x for label in labels))]
     
     # Sample sentences
     sampled_sentences = category_sentences.sample(min(num_samples, len(category_sentences)))
@@ -90,12 +97,16 @@ for category in esg_categories.values():
     for _, row in sampled_sentences.iterrows():
         sentence = row['sentence']
         scores = row['scores']
-        labels = row['labels']
-        # Find the score corresponding to the current category
-        score = next((scores[i] for i, label in enumerate(labels) if esg_categories[label] == category), None)
-        print(f"Sentence: {sentence}\nScore: {score}\n")
+        category_labels = row['labels']
+        # Find the scores corresponding to the current category
+        category_scores = [scores[i] for i, label in enumerate(category_labels) if label in labels]
+        print(f"Sentence: {sentence}\nScores: {category_scores}\n")
 
 
+# Convert it to a DataFrame
+aggregated_df = pd.DataFrame([(sentence, data['labels'], data['scores'], data['ESG']) 
+                              for sentence, data in aggregated_results.items()], 
+                             columns=['sentence', 'labels', 'scores', 'ESG'])
 file_path = "aggregated_results.csv"  # You can change this to your desired file path
 # Save the DataFrame to a CSV file
 aggregated_results.to_csv(file_path, index=False, encoding='utf-8-sig')
