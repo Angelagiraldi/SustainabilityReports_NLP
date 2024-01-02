@@ -73,3 +73,30 @@ print("Display E sentences:")
 E_sentences = aggregated_df[aggregated_df['ESG'].apply(lambda esg_list: 'E' in esg_list) & 
                             aggregated_df['scores'].apply(lambda scores: any(score > 0.8 for score in scores))]
 print(E_sentences.head(10))
+
+
+# Number of random samples per category
+num_samples = 3
+# Iterate over each category and sample sentences
+for category in esg_categories.values():
+    print(f"\nCategory: {category}")
+    # Filter sentences belonging to the current category
+    category_sentences = aggregated_df[aggregated_df['ESG'].apply(lambda esg_list: category in esg_list)]
+    
+    # Sample sentences
+    sampled_sentences = category_sentences.sample(min(num_samples, len(category_sentences)))
+
+    # Display sampled sentences with their scores
+    for _, row in sampled_sentences.iterrows():
+        sentence = row['sentence']
+        scores = row['scores']
+        labels = row['labels']
+        # Find the score corresponding to the current category
+        score = next((scores[i] for i, label in enumerate(labels) if esg_categories[label] == category), None)
+        print(f"Sentence: {sentence}\nScore: {score}\n")
+
+
+file_path = "aggregated_results.csv"  # You can change this to your desired file path
+# Save the DataFrame to a CSV file
+aggregated_results.to_csv(file_path, index=False, encoding='utf-8-sig')
+print(f"Aggregated results saved to {file_path}")
