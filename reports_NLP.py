@@ -59,6 +59,12 @@ for index, classification in classified.iterrows():
     aggregated_results[sentence]['scores'].append(classification['score'])
     aggregated_results[sentence]['ESG'].append(classification['ESG'])
 
+# Iterate over the aggregated results to normalize scores
+for sentence_data in aggregated_results.values():
+    total_score = sum(sentence_data['scores'])
+    if total_score > 0:
+        sentence_data['scores'] = [score / total_score for score in sentence_data['scores']]
+
 # Convert aggregated results to a DataFrame
 aggregated_df = pd.DataFrame([(sentence, data['labels'], data['scores'], data['ESG']) 
                               for sentence, data in aggregated_results.items()], 
@@ -103,10 +109,6 @@ for category, labels in category_to_labels.items():
         print(f"Sentence: {sentence}\nScores: {category_scores}\n")
 
 
-# Convert it to a DataFrame
-aggregated_df = pd.DataFrame([(sentence, data['labels'], data['scores'], data['ESG']) 
-                              for sentence, data in aggregated_results.items()], 
-                             columns=['sentence', 'labels', 'scores', 'ESG'])
 file_path = "aggregated_results.csv"  # You can change this to your desired file path
 # Save the DataFrame to a CSV file
 aggregated_df.to_csv(file_path, index=False, encoding='utf-8-sig')
