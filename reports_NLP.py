@@ -11,8 +11,9 @@ from preprocessing_utils import *
 pd.set_option("display.max_colwidth", None)
 
 
-nestle_url = "https://www.responsibilityreports.com/HostedData/ResponsibilityReports/PDF/NASDAQ_ABNB_2022.pdf"
-pdf_parser = ParsePDF(nestle_url)
+airbnb_url = "https://www.responsibilityreports.com/HostedData/ResponsibilityReports/PDF/NASDAQ_ABNB_2022.pdf"
+cern_url = "https://cernbox.cern.ch/s/jjhyqEubYm9eIyF"
+pdf_parser = ParsePDF(cern_url)
 content = pdf_parser.extract_contents()
 sentences = pdf_parser.clean_text(content)
 
