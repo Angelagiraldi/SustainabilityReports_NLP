@@ -121,21 +121,21 @@ create_distribution_plots(dominant_label_score_data, "Dominant Label", "dominant
 
 # Initialize a dictionary to store the frequencies
 dominant_label_esg_freq = defaultdict(lambda: defaultdict(int))
+
 # Iterate over the DataFrame to populate the dictionary
 for _, row in aggregated_df.iterrows():
-    dominant_label_esg_freq[row['dominant_label']][row['dominant_esg']] += 1
+    dominant_label_esg_freq[row['dominant_esg']][row['dominant_label']] += 1
+
 # Convert the dictionary to a DataFrame
 dominant_label_esg_df = pd.DataFrame(dominant_label_esg_freq).fillna(0)
-# Transpose the DataFrame for plotting
-dominant_label_esg_df = dominant_label_esg_df.T
 # Plot stacked bar chart
 plt.figure(figsize=(12, 8))
 dominant_label_esg_df.plot(kind='bar', stacked=True, ax=plt.gca())
-plt.title("Dominant Label Frequencies by ESG Category")
+plt.title("Frequency of Dominant Labels within ESG Categories")
 plt.xlabel("ESG Categories")
 plt.ylabel("Frequency of Dominant Labels")
 plt.xticks(rotation=45)
-save_plot_as_pdf(plt, "stacked_bar_dominant_esg_category")
+save_plot_as_pdf(plt, "stacked_bar_dominant_label_esg")
 
 plt.close('all')
 print("All plots generated and saved.")
