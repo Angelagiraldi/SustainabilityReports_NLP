@@ -57,11 +57,22 @@ def create_distribution_plots(data, title_prefix, filename_prefix):
 
 # Generating heatmap of label scores for 20 random sentences
 print("Generating heatmap of label scores for 20 random sentences...")
-all_labels = set(label for labels in aggregated_df['labels'] for label in labels)
 sampled_df = aggregated_df.sample(n=20)
-heatmap_data = pd.DataFrame(index=sampled_df['sentence'])
-for label in all_labels:
-    heatmap_data[label] = sampled_df.apply(lambda row: row['scores'][row['labels'].index(label)] if label in row['labels'] else float('nan'), axis=1)
+
+# Create a list of dictionaries, each containing label-score pairs for a sentence
+heatmap_data_list = []
+for _, row in sampled_df.iterrows():
+    label_score_dict = {label: score for label, score in zip(row['labels'], row['scores'])}
+    heatmap_data_list.append(label_score_dict)
+
+# Convert the list of dictionaries to a DataFrame
+heatmap_data = pd.DataFrame(heatmap_data_list, index=sampled_df['sentence'])
+print(heatmap_data.head())  # To see the first few rows of the DataFrame
+
+# Replace NaN with 0 for better visualization
+heatmap_data.fillna(0, inplace=True)
+
+# Plot heatmap
 plt.figure(figsize=(12, 8))
 sns.heatmap(heatmap_data, annot=True, cmap="YlGnBu")
 plt.title("Heatmap of Label Scores for 20 Random Sentences")
@@ -106,6 +117,25 @@ create_distribution_plots(flat_df, "All Labels", "all_labels")
 # Create box and violin plots for dominant labels
 dominant_label_score_data = pd.DataFrame({'Label': aggregated_df['dominant_label'], 'Score': dominant_scores})
 create_distribution_plots(dominant_label_score_data, "Dominant Label", "dominant_label")
+
+
+# Initialize a dictionary to store the frequencies
+dominant_label_esg_freq = defaultdict(lambda: defaultdict(int))
+# Iterate over the DataFrame to populate the dictionary
+for _, row in aggregated_df.iterrows():
+    dominant_label_esg_freq[row['dominant_label']][row['dominant_esg']] += 1
+# Convert the dictionary to a DataFrame
+dominant_label_esg_df = pd.DataFrame(dominant_label_esg_freq).fillna(0)
+# Transpose the DataFrame for plotting
+dominant_label_esg_df = dominant_label_esg_df.T
+# Plot stacked bar chart
+plt.figure(figsize=(12, 8))
+dominant_label_esg_df.plot(kind='bar', stacked=True, ax=plt.gca())
+plt.title("Dominant Label Frequencies by ESG Category")
+plt.xlabel("ESG Categories")
+plt.ylabel("Frequency of Dominant Labels")
+plt.xticks(rotation=45)
+save_plot_as_pdf(plt, "stacked_bar_dominant_esg_category")
 
 plt.close('all')
 print("All plots generated and saved.")
