@@ -3,6 +3,8 @@ from collections import defaultdict
 import pandas as pd
 import torch
 from transformers import pipeline  # Hugging Face
+import os
+os.environ['HF_HOME'] = '/afs/cern.ch/work/a/angirald/.cache/huggingface/hub'
 
 from preprocessing_utils import *
 
