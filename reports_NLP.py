@@ -12,7 +12,7 @@ pd.set_option("display.max_colwidth", None)
 
 
 airbnb_url = "https://www.responsibilityreports.com/HostedData/ResponsibilityReports/PDF/NASDAQ_ABNB_2022.pdf"
-cern_url = "https://cernbox.cern.ch/s/jjhyqEubYm9eIyF"
+cern_url = "https://cds.cern.ch/record/2737239/files/141-134-PB.pdf"
 pdf_parser = ParsePDF(cern_url)
 content = pdf_parser.extract_contents()
 sentences = pdf_parser.clean_text(content)
