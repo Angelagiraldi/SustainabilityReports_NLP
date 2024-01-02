@@ -17,6 +17,8 @@ pdf_parser = ParsePDF(cern_url)
 content = pdf_parser.extract_contents()
 sentences = pdf_parser.clean_text(content)
 
+print(sentences)
+
 print(f"The Airbnb CSR report has {len(sentences):,d} sentences")
 
 print(">>>  Define categories")
