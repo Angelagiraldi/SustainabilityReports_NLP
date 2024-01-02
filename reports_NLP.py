@@ -18,7 +18,7 @@ sentences = pdf_parser.clean_text(content)
 
 print(f"The Airbnb CSR report has {len(sentences):,d} sentences")
 
-print(">>> Define categories")
+print(">>>  Define categories")
 # Define categories we want to classify
 esg_categories = {
   "emissions": "E",
@@ -109,5 +109,5 @@ aggregated_df = pd.DataFrame([(sentence, data['labels'], data['scores'], data['E
                              columns=['sentence', 'labels', 'scores', 'ESG'])
 file_path = "aggregated_results.csv"  # You can change this to your desired file path
 # Save the DataFrame to a CSV file
-aggregated_results.to_csv(file_path, index=False, encoding='utf-8-sig')
+aggregated_df.to_csv(file_path, index=False, encoding='utf-8-sig')
 print(f">>> Aggregated results saved to {file_path}")
