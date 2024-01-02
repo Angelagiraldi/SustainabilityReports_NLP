@@ -6,6 +6,10 @@ import ssl
 
 
 from transformers import pipeline
+
+import pytorch_pretrained_bert as ppb
+assert 'bert-large-cased' in ppb.modeling.PRETRAINED_MODEL_ARCHIVE_MAP
+
 from tika import parser
 
 class ParsePDF:
@@ -176,8 +180,12 @@ class ZeroShotClassifier:
             bool: True if the model is successfully created, False otherwise.
         """
 
-        self.model = pipeline("zero-shot-classification", model=model_name)
-        return True
+        try:
+            self.model = pipeline("zero-shot-classification", model=model_name)
+            return True
+        except Exception as e:
+            print(f"Error loading model: {e}")
+            return False
 
     
     def classify_text(self, text, categories, multi_label=True):
