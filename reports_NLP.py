@@ -13,6 +13,7 @@ pd.set_option("display.max_colwidth", None)
 
 airbnb_url = "https://www.responsibilityreports.com/HostedData/ResponsibilityReports/PDF/NASDAQ_ABNB_2022.pdf"
 cern_url = "https://cds.cern.ch/record/2737239/files/141-134-PB.pdf"
+cern_url = "/afs/cern.ch/work/a/angirald/SustainabilityReports_NLP/156-165-PB.pdf"
 pdf_parser = ParsePDF(cern_url)
 content = pdf_parser.extract_contents()
 sentences = pdf_parser.clean_text(content)
@@ -112,7 +113,7 @@ for category, labels in category_to_labels.items():
         print(f"Sentence: {sentence}\nScores: {category_scores}\n")
 
 
-file_path = "aggregated_results.csv"  # You can change this to your desired file path
+file_path = "aggregated_results_cern2022.csv"  # You can change this to your desired file path
 # Save the DataFrame to a CSV file
 aggregated_df.to_csv(file_path, index=False, encoding='utf-8-sig')
 print(f">>> Aggregated results saved to {file_path}")
