@@ -4,6 +4,20 @@ import matplotlib.pyplot as plt
 from collections import Counter
 import ast
 
+# Define categories we want to classify
+esg_categories = {
+  "emissions": "E",
+  "natural resources": "E",
+  "pollution": "E",
+  "diversity and inclusion": "S",
+  "philanthropy": "S",
+  "health and safety": "S",
+  "training and education": "S",
+  "transparancy": "G",
+  "corporate compliance": "G",
+  "board accountability": "G"}
+
+  
 print("Reading and preprocessing the DataFrame...")
 file_path = "aggregated_results.csv"
 aggregated_df = pd.read_csv(file_path)
