@@ -16,9 +16,9 @@ pdf_parser = ParsePDF(nestle_url)
 content = pdf_parser.extract_contents()
 sentences = pdf_parser.clean_text(content)
 
-print(f"The Nestlè CSR report has {len(sentences):,d} sentences")
+print(f"The Airbnb CSR report has {len(sentences):,d} sentences")
 
-print("Define categories")
+print(">>> Define categories")
 # Define categories we want to classify
 esg_categories = {
   "emissions": "E",
@@ -32,20 +32,20 @@ esg_categories = {
   "corporate compliance": "G",
   "board accountability": "G"}
 
-print("Define model")
+print(">>>  Define model")
 # Define and Create the zero-shot learning model
 #model_name = "microsoft/deberta-v2-xlarge-mnli" 
 model_name = "facebook/bart-large-mnli"
     # a smaller version: "microsoft/deberta-base-mnli"
-print("Define zero shot classifier")
+print(">>>  Define zero shot classifier")
 ZSC = ZeroShotClassifier()
-print("Define zero shot model")
+print(">>>  Create zero shot model")
 ZSC.create_zsl_model(model_name)
     # Note: the warning is expected, so ignore it
 
 # Classify all the sentences in the report
     # Note: this takes a while
-print("Classify")
+print(">>> Classify: ")
 classified = ZSC.text_labels(sentences, esg_categories)
 
 
@@ -65,11 +65,11 @@ aggregated_df = pd.DataFrame([(sentence, data['labels'], data['scores'], data['E
                              columns=['sentence', 'labels', 'scores', 'ESG'])
 
 # Display 20 random sentences with aggregated classifications
-print("Display 20 random sentences with classifications")
+print(">>>  Display 20 random sentences with classifications")
 print(aggregated_df.sample(n=20))
 
 # Display sentences with high 'E' classification scores
-print("Display E sentences:")
+print(">>>  Display E sentences:")
 E_sentences = aggregated_df[aggregated_df['ESG'].apply(lambda esg_list: 'E' in esg_list) & 
                             aggregated_df['scores'].apply(lambda scores: any(score > 0.8 for score in scores))]
 print(E_sentences.head(10))
@@ -110,4 +110,4 @@ aggregated_df = pd.DataFrame([(sentence, data['labels'], data['scores'], data['E
 file_path = "aggregated_results.csv"  # You can change this to your desired file path
 # Save the DataFrame to a CSV file
 aggregated_results.to_csv(file_path, index=False, encoding='utf-8-sig')
-print(f"Aggregated results saved to {file_path}")
+print(f">>> Aggregated results saved to {file_path}")
