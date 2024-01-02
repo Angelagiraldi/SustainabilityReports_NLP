@@ -16,6 +16,17 @@ def save_plot_as_pdf(plt, filename):
     plt.savefig(f"{filename}.pdf", format='pdf', bbox_inches='tight')
     print(f"Saved plot as {filename}.pdf")
 
+def get_dominant_label(labels, scores):
+    if not labels or not scores:
+        return 'Unknown'
+    max_score_index = scores.index(max(scores))
+    return labels[max_score_index]
+
+# Apply the function to each row in the DataFrame
+aggregated_df['dominant_label'] = aggregated_df.apply(lambda row: get_dominant_label(row['labels'], row['scores']), axis=1)
+# Map dominant labels to ESG categories
+aggregated_df['dominant_esg'] = aggregated_df['dominant_label'].apply(lambda label: esg_categories.get(label, 'Unknown'))
+
 print("Generating heatmap of label scores for 20 random sentences...")
 
 # Get all unique labels across the dataset
@@ -39,37 +50,33 @@ plt.xticks(rotation=45)
 plt.tight_layout()  # Adjust layout to fit the x-axis labels
 save_plot_as_pdf(plt, "heatmap_label_scores")
 
-
-# Bar Chart for Frequency of Top Labels
-print("Generating bar chart for frequency of top labels...")
-label_counts = Counter(label for labels in aggregated_df['labels'] for label in labels)
+print("Generating bar chart for frequency of dominant labels...")
+dominant_label_counts = Counter(aggregated_df['dominant_label'])
 plt.figure(figsize=(10, 6))
-plt.bar(label_counts.keys(), label_counts.values())
-plt.title("Frequency of Top Labels")
+plt.bar(dominant_label_counts.keys(), dominant_label_counts.values())
+plt.title("Frequency of Dominant Labels")
 plt.xlabel("Labels")
 plt.ylabel("Frequency")
 plt.xticks(rotation=45)
-save_plot_as_pdf(plt, "bar_chart_top_labels")
+save_plot_as_pdf(plt, "bar_chart_dominant_labels")
 
-# Pie Chart for Distribution of ESG Categories
-print("Generating pie chart for distribution of ESG categories...")
-category_counts = Counter(category for categories in aggregated_df['ESG'] for category in categories)
+# Count the frequency of each dominant ESG category
+dominant_category_counts = Counter(aggregated_df['dominant_esg'])
+# Create a pie chart
 plt.figure(figsize=(8, 8))
-plt.pie(category_counts.values(), labels=category_counts.keys(), autopct='%1.1f%%')
-plt.title("Distribution of ESG Categories")
-save_plot_as_pdf(plt, "pie_chart_esg_distribution")
+plt.pie(dominant_category_counts.values(), labels=dominant_category_counts.keys(), autopct='%1.1f%%')
+plt.title("Distribution of Dominant ESG Categories")
+save_plot_as_pdf(plt, "pie_chart_dominant_esg_distribution")
 
-# Scatter Plot for Score Distributions Across Labels
-print("Generating scatter plot for score distributions across labels...")
-flat_scores = [score for scores in aggregated_df['scores'] for score in scores]
-flat_labels = [label for labels in aggregated_df['labels'] for label in labels]
+print("Generating scatter plot for score distributions across dominant labels...")
+dominant_scores = aggregated_df['scores'].apply(lambda scores: max(scores) if scores else 0)
 plt.figure(figsize=(10, 6))
-plt.scatter(flat_labels, flat_scores, alpha=0.5)
-plt.title("Score Distributions Across Labels")
+plt.scatter(aggregated_df['dominant_label'], dominant_scores, alpha=0.5)
+plt.title("Score Distributions Across Dominant Labels")
 plt.xlabel("Labels")
 plt.ylabel("Scores")
 plt.xticks(rotation=45)
-save_plot_as_pdf(plt, "scatter_plot_score_distribution")
+save_plot_as_pdf(plt, "scatter_plot_dominant_score_distribution")
 
 
 plt.figure(figsize=(12, 8))
@@ -78,17 +85,93 @@ plt.xticks(rotation=45)
 plt.title("Box Plot of Score Distribution by Label")
 save_plot_as_pdf(plt, "box_plot_score_distribution")
 
-label_esg_counts = pd.DataFrame([(label, esg_categories[label], 1) for labels in aggregated_df['labels'] for label in labels], columns=['Label', 'ESG', 'Count']).groupby(['Label', 'ESG']).count().unstack().fillna(0)
-label_esg_counts.plot(kind='bar', stacked=True, figsize=(12, 8))
+# Count the frequency of each label within each ESG category
+label_esg_freq = defaultdict(lambda: defaultdict(int))
+for labels, esg in zip(aggregated_df['labels'], aggregated_df['ESG']):
+    for label in labels:
+        esg_category = esg_categories.get(label, "Unknown")
+        label_esg_freq[label][esg_category] += 1
+
+# Convert to DataFrame
+label_esg_df = pd.DataFrame(label_esg_freq).fillna(0)
+
+# Plot stacked bar chart
+label_esg_df.plot(kind='bar', stacked=True, figsize=(12, 8))
 plt.title("Label Frequencies by ESG Category")
 plt.xlabel("Labels")
 plt.ylabel("Frequency")
 plt.xticks(rotation=45)
 save_plot_as_pdf(plt, "stacked_bar_esg_category")
 
-sns.heatmap(label_features.corr(), annot=True, cmap="coolwarm")
-plt.title("Correlation Heatmap of Labels")
-save_plot_as_pdf(plt, "correlation_heatmap_labels")
+# Flatten the scores and labels for visualization
+flat_data = [(label, score) for labels, scores in zip(aggregated_df['labels'], aggregated_df['scores']) for label, score in zip(labels, scores)]
+flat_df = pd.DataFrame(flat_data, columns=['Label', 'Score'])
+
+# Create box plot
+plt.figure(figsize=(12, 8))
+sns.boxplot(x='Label', y='Score', data=flat_df)
+plt.xticks(rotation=45)
+plt.title("Box Plot of Score Distribution by Label")
+save_plot_as_pdf(plt, "box_plot_score_distribution")
+
+# Count the frequency of each label within each ESG category
+label_esg_freq = defaultdict(lambda: defaultdict(int))
+for labels, esg in zip(aggregated_df['labels'], aggregated_df['ESG']):
+    for label, category in zip(labels, esg):
+        label_esg_freq[label][category] += 1
+
+# Convert to DataFrame
+label_esg_df = pd.DataFrame(label_esg_freq).fillna(0)
+
+# Plot stacked bar chart
+label_esg_df.plot(kind='bar', stacked=True, figsize=(12, 8))
+plt.title("Label Frequencies by ESG Category")
+plt.xlabel("Labels")
+plt.ylabel("Frequency")
+plt.xticks(rotation=45)
+save_plot_as_pdf(plt, "stacked_bar_esg_category")
+
+
+# Count the frequency of each label within each ESG category
+label_esg_freq = defaultdict(lambda: defaultdict(int))
+for labels, esg in zip(aggregated_df['labels'], aggregated_df['ESG']):
+    for label, category in zip(labels, esg):
+        label_esg_freq[label][category] += 1
+
+# Convert to DataFrame
+label_esg_df = pd.DataFrame(label_esg_freq).fillna(0)
+
+# Plot stacked bar chart
+label_esg_df.plot(kind='bar', stacked=True, figsize=(12, 8))
+plt.title("Label Frequencies by ESG Category")
+plt.xlabel("Labels")
+plt.ylabel("Frequency")
+plt.xticks(rotation=45)
+save_plot_as_pdf(plt, "stacked_bar_esg_category")
+
+plt.figure(figsize=(12, 8))
+sns.violinplot(x='Label', y='Score', data=flat_df)
+plt.xticks(rotation=45)
+plt.title("Violin Plot of Score Distributions")
+save_plot_as_pdf(plt, "violin_plot_score_distributions")
+
+# Prepare data for box plot and violin plot
+dominant_label_score_data = pd.DataFrame({'Label': aggregated_df['dominant_label'], 'Score': dominant_scores})
+
+# Box Plot
+plt.figure(figsize=(12, 8))
+sns.boxplot(x='Label', y='Score', data=dominant_label_score_data)
+plt.xticks(rotation=45)
+plt.title("Box Plot of Score Distribution by Dominant Label")
+save_plot_as_pdf(plt, "box_plot_dominant_score_distribution")
+
+# Violin Plot
+plt.figure(figsize=(12, 8))
+sns.violinplot(x='Label', y='Score', data=dominant_label_score_data)
+plt.xticks(rotation=45)
+plt.title("Violin Plot of Score Distributions by Dominant Label")
+save_plot_as_pdf(plt, "violin_plot_dominant_score_distributions")
+
 
 
 plt.close('all')  # Close all open figures
