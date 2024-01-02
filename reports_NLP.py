@@ -49,26 +49,27 @@ print("Classify")
 classified = ZSC.text_labels(sentences, esg_categories)
 
 
+# Initialize a dictionary to hold aggregated results
+aggregated_results = {sentence: {'labels': [], 'scores': [], 'ESG': []} for sentence in sentences}
 
-# Check if the number of sentences matches the number of classified results
-if len(sentences) == len(classified):
-    classified['sentence'] = sentences
-else:
-    print(len(sentences))
-    print(len(classified))
-    print("Error: The number of sentences does not match the number of classified results.")
-    # Optional: Handle the mismatch case, e.g., by aligning sentences with classifications
+# Iterate over the classified results and aggregate information for each sentence
+for index, classification in classified.iterrows():
+    sentence = sentences[index // len(esg_categories)]
+    aggregated_results[sentence]['labels'].append(classification['label'])
+    aggregated_results[sentence]['scores'].append(classification['score'])
+    aggregated_results[sentence]['ESG'].append(classification['ESG'])
 
-# Check if 'sentence' column has been successfully added before attempting to display
-if 'sentence' in classified.columns:
-    print("Available columns in classified DataFrame:", classified.columns)
-    print("Display 20 random sentences with classifications")
-    print(classified[['sentence', 'label', 'score', 'ESG']].sample(n=20))
+# Convert aggregated results to a DataFrame
+aggregated_df = pd.DataFrame([(sentence, data['labels'], data['scores'], data['ESG']) 
+                              for sentence, data in aggregated_results.items()], 
+                             columns=['sentence', 'labels', 'scores', 'ESG'])
 
-    print("Display E sentences:")
-    if 'score' in classified.columns and 'ESG' in classified.columns:
-        E_sentences = classified[classified.score.gt(0.8) & classified.ESG.eq("E")][['sentence', 'label', 'score', 'ESG']].copy()
-        print(E_sentences.head(10))
-else:
-    print("Sentence column not added. Displaying results without sentences.")
-    print(classified[['label', 'score', 'ESG']].sample(n=20))
+# Display 20 random sentences with aggregated classifications
+print("Display 20 random sentences with classifications")
+print(aggregated_df.sample(n=20))
+
+# Display sentences with high 'E' classification scores
+print("Display E sentences:")
+E_sentences = aggregated_df[aggregated_df['ESG'].apply(lambda esg_list: 'E' in esg_list) & 
+                            aggregated_df['scores'].apply(lambda scores: any(score > 0.8 for score in scores))]
+print(E_sentences.head(10))
