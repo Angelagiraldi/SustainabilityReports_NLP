@@ -1,7 +1,7 @@
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-from collections import Counter
+from collections import Counter, defaultdict
 import ast
 
 # Define categories we want to classify
@@ -17,7 +17,7 @@ esg_categories = {
   "corporate compliance": "G",
   "board accountability": "G"}
 
-  
+
 print("Reading and preprocessing the DataFrame...")
 file_path = "aggregated_results.csv"
 aggregated_df = pd.read_csv(file_path)
