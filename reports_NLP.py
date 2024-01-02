@@ -47,14 +47,21 @@ ZSC.create_zsl_model(model_name)
 print("Classify")
 classified = ZSC.text_labels(sentences, esg_categories)
 
+# Ensure the 'sentences' list is aligned with the 'classified' DataFrame
+if len(sentences) == len(classified):
+    classified['sentence'] = sentences
+else:
+    print("Error: The number of sentences does not match the number of classified results.")
+
+
 print("Available columns in classified DataFrame:", classified.columns)
-print("Display 20 random sentences")
-print(classified.sample(n=20))  # display 20 random records
+# Display 20 random records with sentences
+print(classified[['sentence', 'label', 'score', 'ESG']].sample(n=20))
 
 print("Display E sentences:")
-# Ensure 'score' and 'ESG' columns exist before attempting to filter
-if 'score' in classified.columns and 'ESG' in classified.columns:
-    E_sentences = classified[classified.score.gt(0.8) & classified.ESG.eq("E")].copy()
+# Display sentences classified as 'E' with a score greater than 0.8
+if 'score' in classified.columns and 'ESG' in classified.columns and 'sentence' in classified.columns:
+    E_sentences = classified[classified.score.gt(0.8) & classified.ESG.eq("E")][['sentence', 'label', 'score', 'ESG']].copy()
     print(E_sentences.head(10))
 else:
-    print("Error: 'score' and/or 'ESG' columns not found in the DataFrame.")
+    print("Error: Necessary columns not found in the DataFrame.")
