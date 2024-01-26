@@ -1,7 +1,7 @@
 import pandas as pd
 import spacy
-import yfinance as yf
 from preprocessing_utils import *
+
 
 # Load Spacy model globally
 nlp = spacy.load('en_core_web_sm')
@@ -11,7 +11,6 @@ token_dict = {
         'GHG emissions within carbon neutral boundary': [], 'Total renewable electricity consumption': [],
         'Total water discharges': [], 'Percentage of product packaging recyclability': []
     }
-
 
 def classify_entities_with_context(text, stocks_df, classifier, category_dict = token_dict):
     """
@@ -50,24 +49,25 @@ def classify_entities_with_context(text, stocks_df, classifier, category_dict = 
 
     return entity_sentences
 
-# Load stock data once at the beginning
-stocks_df = pd.read_csv("./data/ind_nifty500list.csv")
-
-# RSS link input
 # User input for RSS link or PDF file
 user_input = "DataFactSheet-2022MicrosoftSustainabilityReport.pdf"
+print(f"Processing file: {user_input}")
+
 pdf_parser = ParsePDF(user_input)
 content = pdf_parser.extract_contents()
+print("Extracted content from PDF.")
+
 sentences = pdf_parser.clean_text(content)
+print("Cleaned text from PDF.")
 
 zsl_classifier = ZeroShotClassifier()
-model_created = zsl_classifier.create_zsl_model('facebook/bart-large-mnli')  
+print("Initializing ZeroShotClassifier model...")
+model_created = zsl_classifier.create_zsl_model('facebook/bart-large-mnli')
 
-
-# Process the input source and display results
-If model_created:
+if model_created:
+    print("Model created successfully. Classifying entities...")
     entity_info = classify_entities_with_context(sentences, stocks_df, zsl_classifier, token_dict)
+    print("Classification completed.")
     print(entity_info)
 else:
     print("Failed to create the ZeroShotClassifier model.")
-
