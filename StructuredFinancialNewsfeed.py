@@ -7,9 +7,9 @@ from preprocessing_utils import *
 nlp = spacy.load('en_core_web_sm')
 
 token_dict = {
-        'Org': [], 'Total emissions (Scope 1 + 2 + 3)': [], 'Category 6 – Business Travel': [],
-        'GHG emissions within carbon neutral boundary': [], 'Total renewable electricity consumption': [],
-        'Total water discharges': [], 'Percentage of product packaging recyclability': []
+        'Org': None, 'Total emissions (Scope 1 + 2 + 3)': None, 'Category 6 – Business Travel': None,
+        'GHG emissions within carbon neutral boundary': None, 'Total renewable electricity consumption': None,,
+        'Total water discharges': None, 'Percentage of product packaging recyclability': None
     }
 
 
