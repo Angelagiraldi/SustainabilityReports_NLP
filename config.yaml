@@ -1,0 +1,29 @@
+model: custom-model
+columns:
+  - name: Org
+    type: text
+    prompt: What is the organization's name?
+
+  - name: Total emissions (Scope 1 + 2 + 3)
+    type: real
+    prompt: What are the total emissions (Scope 1 + 2 + 3) for the organization?
+
+  - name: Category 6 – Business Travel
+    type: real
+    prompt: What is the total emissions value for Category 6 – Business Travel?
+
+  - name: GHG emissions within carbon neutral boundary
+    type: real
+    prompt: What are the greenhouse gas emissions within the carbon neutral boundary for the organization?
+
+  - name: Total renewable electricity consumption
+    type: real
+    prompt: What is the total renewable electricity consumption for the organization?
+
+  - name: Total water discharges
+    type: real
+    prompt: What is the total water discharge volume for the organization?
+
+  - name: Percentage of product packaging recyclability
+    type: real
+    prompt: What is the percentage of product packaging recyclability for the organization?

@@ -243,3 +243,43 @@ class ZeroShotClassifier:
                     })
 
         return pd.DataFrame(processed_results)
+    
+
+    def text_structured_labels(self, text, category_dict, cutoff=None):
+        categories = list(category_dict.keys())
+        result = self.classify_text(text, categories, multi_label=True)
+
+        print("results")
+
+        if not result:
+            return pd.DataFrame()  # Return an empty DataFrame in case of an error
+
+        processed_results = []
+        for res in result:  # 'result' is always a list now
+            for label, score in zip(res.get("labels", []), res.get("scores", [])):
+                if cutoff is None or score > cutoff:
+                    processed_results.append({
+                        "label": label,
+                        "score": score,
+                        "ESG": category_dict.get(label, "Unknown")
+                    })
+
+        return pd.DataFrame(processed_results)
+    
+
+
+
+# Define the Collector class
+
+class UnstructuredCollector:
+    def __init__(self):
+        self.documents = {}
+    
+    def add_document(self, title, raw_text):
+        self.documents[title] = raw_text
+    
+    def get_raw_text(self, title):
+        return self.documents.get(title, "Document not found")
+
+    def list_doc_titles(self):
+        return list(self.documents.keys())

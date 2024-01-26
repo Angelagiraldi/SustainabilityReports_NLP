@@ -16,6 +16,22 @@ token_dict = {
         'Percentage of product packaging recyclability': 'E'
     }
 
+def classify_text(self, text, categories, multi_label=True):
+    if not self.model:
+        raise ValueError("Model not initialized. Call create_zsl_model first.")
+
+    hypothesis_template = "This text is about {}."
+    try:
+        result = self.model(text, categories, multi_label=multi_label, hypothesis_template=hypothesis_template)
+        
+        # Adjust the handling based on the type of 'text'
+        if isinstance(text, str):  # Single text
+            return [result]  # Wrap the result in a list for consistent handling
+        else:  # Multiple texts
+            return result
+    except Exception as e:
+        print(f"Error during classification: {e}")
+        return []
 
 def classify_entities_with_context(sentences, classifier, category_dict):
     """
@@ -32,12 +48,11 @@ def classify_entities_with_context(sentences, classifier, category_dict):
     categorized_sentences = {category: [] for category in category_dict}
 
     for sentence in sentences:
-        classification_result = classifier.text_labels(sentence, category_dict)
+        classification_result = classifier.text_structured_labels(sentence, category_dict)
         for result in classification_result:
             for label in result.get('labels', []):
                 if label in category_dict and result.get('score', 0) > 0.6:  
                     categorized_sentences[label].append(sentence)
-
     return categorized_sentences
 
 # User input for RSS link or PDF file
