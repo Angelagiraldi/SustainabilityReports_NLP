@@ -3,17 +3,14 @@ import requests
 from bs4 import BeautifulSoup
 import spacy
 from spacypdfreader.spacypdfreader import pdf_reader
-
-import streamlit as st
 import yfinance as yf
+from preprocessing_utils import *
 
-# Load Spacy model globally to avoid reloading it in every function
+# Load Spacy model globally
 nlp = spacy.load('en_core_web_sm')
 
-# Set up Streamlit title
-st.title('Buzzing Stocks :zap:')
 
-def process_rss(headings):
+def process_text(text):
     """
     Processes RSS feed headings for NLP analysis.
     """
@@ -31,12 +28,15 @@ def extract_text(input_source):
     if input_source.lower().endswith('.pdf'):
         # Handle PDF file
         doc = pdf_reader(input_source, nlp)
-        return [doc.text]  # Return a list containing the entire text of the PDF
+        return doc.text
     else:
         # Handle RSS link
         response = requests.get(input_source)
         soup = BeautifulSoup(response.content, features='lxml')
+        # Decide if you want to process the entire content of the articles
+        # or just the titles as previously.
         return [title.text for title in soup.findAll('title')]
+
 
 def stock_info(headings, stocks_df):
     """
@@ -77,7 +77,7 @@ stocks_df = pd.read_csv("./data/ind_nifty500list.csv")
 # RSS link input
 # User input for RSS link or PDF file
 user_input = st.text_input("Add your RSS link or upload a PDF file:", 
-                           "https://www.moneycontrol.com/rss/buzzingstocks.xml")
+                           "DataFactSheet-2022MicrosoftSustainabilityReport")
 
 # Determine if the input is a link or a file path (for PDF)
 if user_input.startswith('http://') or user_input.startswith('https://'):
@@ -86,14 +86,17 @@ if user_input.startswith('http://') or user_input.startswith('https://'):
 else:
     # Assume it's a file path for a PDF
     fin_headings = extract_text(user_input)
+    pdf_parser = ParsePDF(user_input)
+    content = pdf_parser.extract_contents()
+    sentences = pdf_parser.clean_text(content)
 
-# Process RSS feed and display results
-fin_headings = extract_text_from_rss(user_input)
+
+# Process the input source and display results
 output_df = stock_info(fin_headings, stocks_df)
 output_df.drop_duplicates(inplace=True)
-st.dataframe(output_df)
+print(output_df)
 
-# Display financial news in an expander
-with st.expander("Expand for Financial News!"):
-    for h in fin_headings:
-        st.markdown("* " + h.text)
+# Display financial news
+print("\nFinancial News:")
+for h in fin_headings:
+    print("* " + h.text)
