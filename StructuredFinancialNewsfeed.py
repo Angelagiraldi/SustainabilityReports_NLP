@@ -8,7 +8,7 @@ nlp = spacy.load('en_core_web_sm')
 
 token_dict = {
         'Org': None, 'Total emissions (Scope 1 + 2 + 3)': None, 'Category 6 – Business Travel': None,
-        'GHG emissions within carbon neutral boundary': None, 'Total renewable electricity consumption': None,,
+        'GHG emissions within carbon neutral boundary': None, 'Total renewable electricity consumption': None,
         'Total water discharges': None, 'Percentage of product packaging recyclability': None
     }
 
@@ -28,10 +28,10 @@ def classify_entities_with_context(sentences, classifier, category_dict):
     categorized_sentences = {category: [] for category in category_dict}
 
     for sentence in sentences:
-        classification_result = classifier.text_labels(sentence, list(category_dict.keys()))
+        classification_result = classifier.text_labels(sentence, category_dict)
         for result in classification_result:
             for label in result.get('labels', []):
-                if label in category_dict and result.get('score', 0) > 0.5:  # Adjust the score threshold as needed
+                if label in category_dict and result.get('score', 0) > 0.6:  
                     categorized_sentences[label].append(sentence)
 
     return categorized_sentences
