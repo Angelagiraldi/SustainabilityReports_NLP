@@ -268,6 +268,30 @@ class ZeroShotClassifier:
     
 
 
+def chunk_document(document, chunk_size):
+    """
+    Splits a document into chunks of a specified size.
+
+    Args:
+        document (str): The document to be chunked.
+        chunk_size (int): Maximum size of each chunk in characters.
+
+    Returns:
+        list: A list of document chunks.
+    """
+    chunks = []
+
+    # Ensure chunk_size is positive
+    if chunk_size <= 0:
+        raise ValueError("Chunk size must be greater than 0.")
+
+    # Iterate over the document and extract chunks
+    for i in range(0, len(document), chunk_size):
+        chunks.append(document[i:i + chunk_size])
+
+    return chunks
+
+
 
 # Define the Collector class
 
