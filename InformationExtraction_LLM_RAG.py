@@ -29,7 +29,7 @@ with open('config.yaml', 'r') as file:
     yaml_config = yaml.safe_load(file)
 
 # Define a chunk size
-chunk_size = 500
+chunk_size = 1000
 
 # Initialize the pre-trained model
 model = pipeline('text-generation', model=yaml_config['model'])  # Replace with your model of choice
