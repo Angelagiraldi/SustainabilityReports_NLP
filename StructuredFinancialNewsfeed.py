@@ -1,102 +1,73 @@
 import pandas as pd
-import requests
-from bs4 import BeautifulSoup
 import spacy
-from spacypdfreader.spacypdfreader import pdf_reader
 import yfinance as yf
 from preprocessing_utils import *
 
 # Load Spacy model globally
 nlp = spacy.load('en_core_web_sm')
 
-
-def process_text(text):
-    """
-    Processes RSS feed headings for NLP analysis.
-    """
-    for title in headings:
-        doc = nlp(title.text)
-        # Process with NLP here (e.g., visualize NER)
-        # Removed code for brevity
-        print("Done----------")
-
-def extract_text(input_source):
-    """
-    Extracts text from the given input source, which can be either
-    an RSS link or a PDF file.
-    """
-    if input_source.lower().endswith('.pdf'):
-        # Handle PDF file
-        doc = pdf_reader(input_source, nlp)
-        return doc.text
-    else:
-        # Handle RSS link
-        response = requests.get(input_source)
-        soup = BeautifulSoup(response.content, features='lxml')
-        # Decide if you want to process the entire content of the articles
-        # or just the titles as previously.
-        return [title.text for title in soup.findAll('title')]
-
-
-def stock_info(headings, stocks_df):
-    """
-    Extracts stock information based on the headings.
-    """
-    token_dict = {
-        'Org': [], 'Symbol': [], 'currentPrice': [],
-        'dayHigh': [], 'dayLow': [], 'forwardPE': [], 'dividendYield': []
+token_dict = {
+        'Org': [], 'Total emissions (Scope 1 + 2 + 3)': [], 'Category 6 – Business Travel': [],
+        'GHG emissions within carbon neutral boundary': [], 'Total renewable electricity consumption': [],
+        'Total water discharges': [], 'Percentage of product packaging recyclability': []
     }
-    for title in headings:
-        doc = nlp(title.text)
-        for token in doc.ents:
-            # Check and retrieve stock information
-            try:
-                if stocks_df['Company Name'].str.contains(token.text).sum():
-                    symbol = stocks_df[stocks_df['Company Name'].\
-                                        str.contains(token.text)]['Symbol'].values[0]
-                    org_name = stocks_df[stocks_df['Company Name'].\
-                                        str.contains(token.text)]['Company Name'].values[0]
-                    token_dict['Org'].append(org_name)
-                    print(symbol+".NS")
-                    token_dict['Symbol'].append(symbol)
-                    stock_info = yf.Ticker(symbol+".NS").info
-                    token_dict['currentPrice'].append(stock_info['currentPrice'])
-                    token_dict['dayHigh'].append(stock_info['dayHigh'])
-                    token_dict['dayLow'].append(stock_info['dayLow'])
-                    token_dict['forwardPE'].append(stock_info['forwardPE'])
-                    token_dict['dividendYield'].append(stock_info['dividendYield'])
-                else:
-                    pass
-            except:
-                pass
-    return pd.DataFrame(token_dict)
+
+
+def classify_entities_with_context(text, stocks_df, classifier, category_dict = token_dict):
+    """
+    Extracts information based on the text and classifies sentences 
+    into predefined categories for each entity.
+
+    Args:
+        text (str): The text to analyze.
+        stocks_df (DataFrame): DataFrame containing stock information.
+        classifier (ZeroShotClassifier): An instance of the ZeroShotClassifier.
+        category_dict (dict): Dictionary mapping categories to labels.
+
+    Returns:
+        dict: Dictionary with entities and their associated sentences.
+    """
+    
+    doc = nlp(text)
+    entity_sentences = {}
+
+    for token in doc.ents:
+        if stocks_df['Company Name'].str.contains(token.text).sum():
+            # Find sentences containing the entity
+            sentences = [sent.text for sent in doc.sents if token.text in sent.text]
+            entity_sentences[token.text] = {
+                'sentences': [],
+                'categories': []
+            }
+
+            # Classify each sentence and store relevant ones
+            for sentence in sentences:
+                classification_result = classifier.text_labels(sentence, category_dict)
+                relevant_sentences = classification_result.loc[classification_result['score'] > 0.5]  # Adjust score threshold as needed
+                if not relevant_sentences.empty:
+                    entity_sentences[token.text]['sentences'].append(sentence)
+                    entity_sentences[token.text]['categories'].extend(relevant_sentences['ESG'].unique().tolist())
+
+    return entity_sentences
 
 # Load stock data once at the beginning
 stocks_df = pd.read_csv("./data/ind_nifty500list.csv")
 
 # RSS link input
 # User input for RSS link or PDF file
-user_input = st.text_input("Add your RSS link or upload a PDF file:", 
-                           "DataFactSheet-2022MicrosoftSustainabilityReport")
+user_input = "DataFactSheet-2022MicrosoftSustainabilityReport.pdf"
+pdf_parser = ParsePDF(user_input)
+content = pdf_parser.extract_contents()
+sentences = pdf_parser.clean_text(content)
 
-# Determine if the input is a link or a file path (for PDF)
-if user_input.startswith('http://') or user_input.startswith('https://'):
-    # Process RSS feed
-    fin_headings = extract_text(user_input)
-else:
-    # Assume it's a file path for a PDF
-    fin_headings = extract_text(user_input)
-    pdf_parser = ParsePDF(user_input)
-    content = pdf_parser.extract_contents()
-    sentences = pdf_parser.clean_text(content)
+zsl_classifier = ZeroShotClassifier()
+model_created = zsl_classifier.create_zsl_model('facebook/bart-large-mnli')  
 
 
 # Process the input source and display results
-output_df = stock_info(fin_headings, stocks_df)
-output_df.drop_duplicates(inplace=True)
-print(output_df)
+If model_created:
+    entity_info = classify_entities_with_context(sentences, stocks_df, zsl_classifier, token_dict)
+    print(entity_info)
+else:
+    print("Failed to create the ZeroShotClassifier model.")
 
-# Display financial news
-print("\nFinancial News:")
-for h in fin_headings:
-    print("* " + h.text)

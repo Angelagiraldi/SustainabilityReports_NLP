@@ -2,7 +2,6 @@ import pandas as pd
 import re
 import string
 import nltk
-import ssl
 
 
 from transformers import pipeline
