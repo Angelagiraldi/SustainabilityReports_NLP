@@ -5,6 +5,12 @@ import yaml
 from transformers import pipeline
 from preprocessing_utils import *
 
+from transformers import AutoModelForCausalLM, AutoTokenizer
+device = "cuda" # the device to load the model onto
+
+
+
+
 
 collection = UnstructuredCollector()
 
@@ -32,7 +38,8 @@ with open('config.yaml', 'r') as file:
 chunk_size = 1000
 
 # Initialize the pre-trained model
-model = pipeline('text-generation', model=yaml_config['model'])  # Replace with your model of choice
+model = AutoModelForCausalLM.from_pretrained(model=yaml_config['model'])
+tokenizer = AutoTokenizer.from_pretrained(model=yaml_config['model'])
 
 # Process each document in collection
 for title in collection.list_doc_titles():
