@@ -1,5 +1,6 @@
 model: mistralai/Mistral-7B-v0.1
 columns:
+
   - name: Org
     type: text
     prompt: What is the organization's name?
@@ -7,23 +8,41 @@ columns:
   - name: Total emissions (Scope 1 + 2 + 3)
     type: real
     prompt: What are the total emissions (Scope 1 + 2 + 3) for the organization?
+    options: # Specify options if applicable
+    min_value: # Minimum value
+    max_value: # Maximum value
 
   - name: Category 6 – Business Travel
     type: real
     prompt: What is the total emissions value for Category 6 – Business Travel?
+    options:
+    min_value:
+    max_value:
 
   - name: GHG emissions within carbon neutral boundary
     type: real
     prompt: What are the greenhouse gas emissions within the carbon neutral boundary for the organization?
+    options:
+    min_value:
+    max_value:
 
   - name: Total renewable electricity consumption
     type: real
     prompt: What is the total renewable electricity consumption for the organization?
+    options:
+    min_value:
+    max_value:
 
   - name: Total water discharges
     type: real
     prompt: What is the total water discharge volume for the organization?
+    options:
+    min_value:
+    max_value:
 
   - name: Percentage of product packaging recyclability
     type: real
     prompt: What is the percentage of product packaging recyclability for the organization?
+    options:
+    min_value:
+    max_value:
